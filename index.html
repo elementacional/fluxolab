@@ -230,6 +230,11 @@
     .form-library-item svg{width:72px;height:38px;overflow:visible}
     .form-library-item span{line-height:1.18}
     .forms-library-note{font-size:10px;color:#64748b;line-height:1.5;margin-bottom:7px}
+    .fl-format-btn{border:1px solid #cbd5e1;background:#f8fafc;color:#334155;border-radius:9px;height:34px;font-size:15px;cursor:pointer;transition:background .15s,border-color .15s}
+    .fl-format-btn:hover{background:#e2e8f0}
+    .fl-format-btn[aria-pressed="true"]{background:#dbeafe;border-color:#2563eb;color:#1d4ed8;box-shadow:inset 0 0 0 1px #2563eb}
+    body.studio-dark .fl-format-btn{background:#18283d;color:#cbd5e1;border-color:#40536d}
+    body.studio-dark .fl-format-btn[aria-pressed="true"]{background:#254a77;color:#fff;border-color:#60a5fa}
     /* Texto livre sem caixa: destaque apenas durante seleção. */
     .flow-node.free-text-node{filter:none!important}
     .flow-node.free-text-node .node-label{padding:5px 7px;text-align:left;justify-content:flex-start;align-items:flex-start;line-height:1.35}
@@ -686,6 +691,15 @@
           </div>
         </div>
 
+        <!-- Formatação de texto (aplicada ao objeto selecionado) -->
+        <div class="pt-1 border-t border-slate-100">
+          <label class="block text-[11px] font-semibold text-slate-600 mb-1.5">Estilo do texto</label>
+          <div class="grid grid-cols-3 gap-2" role="group" aria-label="Formatação do texto">
+            <button type="button" id="propBoldBtn" class="fl-format-btn" title="Negrito" aria-label="Negrito" aria-pressed="false" onclick="toggleNodeTextFormat('bold')"><strong>N</strong></button>
+            <button type="button" id="propItalicBtn" class="fl-format-btn" title="Itálico" aria-label="Itálico" aria-pressed="false" onclick="toggleNodeTextFormat('italic')"><em>I</em></button>
+            <button type="button" id="propUnderlineBtn" class="fl-format-btn" title="Sublinhado (grifado)" aria-label="Sublinhado (grifado)" aria-pressed="false" onclick="toggleNodeTextFormat('underline')"><u>S</u></button>
+          </div>
+        </div>
         <!-- Paleta de Preenchimento 3D -->
         <div class="pt-1 border-t border-slate-100">
           <label class="block text-[11px] font-semibold text-slate-600 mb-1.5">Cor do Bloco 3D</label>
@@ -1168,11 +1182,12 @@
         const isContainer = node.type === 'container';
         const fontFam = node.fontFamily || "'Inter', system-ui, sans-serif";
         const fontSz = node.fontSize || 13;
+        const textFormat = `font-weight:${node.bold ? 700 : isContainer ? 700 : 400}; font-style:${node.italic ? 'italic' : 'normal'}; text-decoration:${node.underline ? 'underline' : 'none'};`;
         const labelStyle = node.type === 'text'
-          ? `align-items: flex-start; justify-content: flex-start; text-align:left; padding:5px 7px; font-weight: 400; color: ${node.textColor}; font-family: ${fontFam}; font-size: ${fontSz}px;`
+          ? `align-items: flex-start; justify-content: flex-start; text-align:left; padding:5px 7px; ${textFormat} color: ${node.textColor}; font-family: ${fontFam}; font-size: ${fontSz}px;`
           : isContainer
-          ? `align-items: flex-start; justify-content: flex-start; padding: 12px 14px; font-weight: 700; color: ${node.textColor}; font-family: ${fontFam}; font-size: ${fontSz}px;`
-          : `color: ${node.textColor}; font-family: ${fontFam}; font-size: ${fontSz}px;`;
+          ? `align-items: flex-start; justify-content: flex-start; padding: 12px 14px; ${textFormat} color: ${node.textColor}; font-family: ${fontFam}; font-size: ${fontSz}px;`
+          : `${textFormat} color: ${node.textColor}; font-family: ${fontFam}; font-size: ${fontSz}px;`;
 
         el.innerHTML = `
           <svg width="${node.width}" height="${node.height}" class="block overflow-visible">
@@ -1722,6 +1737,10 @@
         document.getElementById('propFontFamily').value = node.fontFamily || "'Inter', system-ui, sans-serif";
         document.getElementById('propFontSize').value = node.fontSize || 13;
         document.getElementById('propTextColor').value = node.textColor || '#0f172a';
+        [['propBoldBtn','bold'],['propItalicBtn','italic'],['propUnderlineBtn','underline']].forEach(([id,prop])=>{
+          const active = prop === 'bold' ? (node.bold ?? node.type === 'container') : !!node[prop];
+          document.getElementById(id).setAttribute('aria-pressed',String(active));
+        });
         document.getElementById('propNodeWidth').value = node.width;
         document.getElementById('propNodeHeight').value = node.height;
       } else if (selection.type === 'edge') {
@@ -1771,6 +1790,17 @@
       node.textColor = preset.text;
       saveState();
       renderAll();
+    }
+
+    function toggleNodeTextFormat(prop) {
+      if (selection.type !== 'node' || !['bold','italic','underline'].includes(prop)) return;
+      const node = state.nodes.find(n => n.id === selection.id);
+      if (!node) return;
+      const current = prop === 'bold' ? (node.bold ?? node.type === 'container') : !!node[prop];
+      node[prop] = !current;
+      saveState();
+      renderNodes();
+      updatePropertiesPanel();
     }
 
     function updateSelectedNodeProp(prop, val) {
@@ -1921,7 +1951,7 @@
           const startY = node.type === 'text' ? 5 + fontSize * .85 : (node.height / 2) - (totalHeight / 2) + (fontSize * 0.85);
           const fam = (node.fontFamily || 'Inter, Arial, sans-serif').replace(/"/g, "'");
 
-          svg += `<text x="${node.type === 'text' ? 7 : node.width/2}" y="${startY}" text-anchor="${node.type === 'text' ? 'start' : 'middle'}" font-family="${fam}" font-size="${fontSize}" font-weight="${node.type === 'text' ? 400 : 500}" fill="${node.textColor}">`;
+          svg += `<text x="${node.type === 'text' ? 7 : node.width/2}" y="${startY}" text-anchor="${node.type === 'text' ? 'start' : 'middle'}" font-family="${fam}" font-size="${fontSize}" font-weight="${node.bold ?? (node.type === 'container' ? 700 : node.type === 'text' ? 400 : 500)}" font-style="${node.italic ? 'italic' : 'normal'}" text-decoration="${node.underline ? 'underline' : 'none'}" fill="${node.textColor}">`;
           lines.forEach((line, idx) => {
             const dy = idx === 0 ? 0 : lineHeight;
             svg += `<tspan x="${node.type === 'text' ? 7 : node.width/2}" dy="${dy}">${escapeHtml(line)}</tspan>`;
