@@ -230,6 +230,11 @@
     .form-library-item svg{width:72px;height:38px;overflow:visible}
     .form-library-item span{line-height:1.18}
     .forms-library-note{font-size:10px;color:#64748b;line-height:1.5;margin-bottom:7px}
+    /* Texto livre sem caixa: destaque apenas durante seleção. */
+    .flow-node.free-text-node{filter:none!important}
+    .flow-node.free-text-node .node-label{padding:5px 7px;text-align:left;justify-content:flex-start;align-items:flex-start;line-height:1.35}
+    .flow-node.free-text-node.selected{outline:1px dashed #2563eb;outline-offset:2px;border-radius:3px}
+    .flow-node.free-text-node .anchor-point{display:none!important}
     /* Zoom por scroll: desativado normalmente, verde translúcido quando ativado. */
     #zoomControlBar{transition:background .18s,border-color .18s,box-shadow .18s}
     #zoomControlBar.wheel-zoom-active{background:rgba(34,197,94,.18)!important;border-color:rgba(34,197,94,.45)!important;box-shadow:0 10px 26px rgba(34,197,94,.14),0 2px 6px rgba(15,23,42,.08)}
@@ -447,7 +452,7 @@
 
     <!-- PALETA DE FORMAS 3D E IMAGENS (ESQUERDA) -->
     <!-- Barra lateral PRO: dock minimalista com ferramentas e menus contextuais -->
-    <aside id="studioDock" aria-label="Ferramentas vetoriais"><button type="button" class="dock-tool" id="dock-select" data-tool="select" onclick="dockMode('select')" title="Ponteiro" aria-label="Ponteiro" ><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l14 10-7 1-3 7z"/></svg></button><button type="button" class="dock-tool" id="dock-pen" data-tool="pen" onclick="dockMode('pen-straight')" title="Caneta reta" aria-label="Caneta reta" ><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20L20 4M12 4h8v8"/></svg></button><button type="button" class="dock-tool" id="dock-curve" data-tool="curve" onclick="dockMode('pen-curve')" title="Caneta curva Bézier" aria-label="Caneta curva Bézier" ><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18Q8 3 13 12T21 6"/></svg></button><div class="dock-sep"></div><button type="button" class="dock-tool" id="dock-shapes" data-tool="shapes" onclick="openDockFlyout('shapes')" title="Formas e símbolos" aria-label="Formas e símbolos" aria-haspopup="true"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="9" height="9" rx="1"/><circle cx="17" cy="16" r="5"/></svg><span class="dock-caret">▸</span></button><button type="button" class="dock-tool" id="dock-line" data-tool="line" onclick="openDockFlyout('line')" title="Linhas e setas" aria-label="Linhas e setas" aria-haspopup="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18L21 6"/><circle cx="3" cy="18" r="2"/><circle cx="21" cy="6" r="2"/></svg><span class="dock-caret">▸</span></button><button type="button" class="dock-tool" id="dock-font" data-tool="font" onclick="openDockFlyout('font')" title="Fontes e texto" aria-label="Fontes e texto" aria-haspopup="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20L12 3l8 17M7 14h10"/></svg><span class="dock-caret">▸</span></button><button type="button" class="dock-tool" id="dock-image" data-tool="image" onclick="openDockFlyout('image')" title="Importar imagem" aria-label="Importar imagem" aria-haspopup="true"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8" cy="9" r="1.5"/><path d="M4 18l6-6 4 4 3-3 4 4"/></svg><span class="dock-caret">▸</span></button><button type="button" class="dock-tool" id="dock-fill" data-tool="fill" onclick="openDockFlyout('fill')" title="Cores e preenchimento" aria-label="Cores e preenchimento" aria-haspopup="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3l9 9-6 6-9-9zM14 19h8"/></svg><span class="dock-caret">▸</span></button><div class="dock-sep"></div><button type="button" class="dock-tool" id="dock-edit" data-tool="edit" onclick="openDockFlyout('edit')" title="Alinhar elementos" aria-label="Alinhar elementos" aria-haspopup="true"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="5" width="12" height="12"/><path d="M9 1v4M17 9h5M1 13h4"/></svg><span class="dock-caret">▸</span></button><button type="button" class="dock-tool" id="dock-copy" data-tool="copy" onclick="duplicateSelectedNode()" title="Duplicar elemento" aria-label="Duplicar elemento" ><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="7" width="13" height="13" rx="1"/><path d="M4 16H3V3h13v1"/></svg></button><button type="button" class="dock-tool" id="dock-delete" data-tool="delete" onclick="deleteSelectedElement()" title="Excluir elemento" aria-label="Excluir elemento" ><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14M10 11v7M14 11v7"/></svg></button><div class="dock-spacer"></div><button type="button" class="dock-tool compact-star" id="dock-star" onclick="toggleCompactWorkspace()" title="Engrenagem: alternar exibição dos recursos superiores" aria-label="Alternar exibição dos recursos superiores" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.8 2.4h4.4l.6 2.5 2 1.1 2.5-.7 2.2 3.8-1.9 1.8v2.2l1.9 1.8-2.2 3.8-2.5-.7-2 1.1-.6 2.5H9.8l-.6-2.5-2-1.1-2.5.7-2.2-3.8 1.9-1.8v-2.2L2.5 9.1l2.2-3.8 2.5.7 2-1.1z M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6"/></svg></button><button type="button" class="dock-tool" id="dock-files" data-tool="files" title="Arquivos, modelos e exportação" aria-label="Arquivos e exportação"><svg viewBox="0 0 24 24"><path d="M5 3h10l4 4v14H5zM14 3v5h5M8 13h8M8 17h8"/></svg></button><button type="button" class="dock-tool" id="dock-properties" data-tool="properties" title="Propriedades do objeto" aria-label="Propriedades do objeto"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16"/><circle cx="9" cy="5" r="2" fill="currentColor" stroke="none"/><circle cx="16" cy="12" r="2" fill="currentColor" stroke="none"/><circle cx="11" cy="19" r="2" fill="currentColor" stroke="none"/></svg></button><button type="button" class="dock-tool" id="dock-center" onclick="resetView()" title="Centralizar / 100%" aria-label="Centralizar prancheta em 100%"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path d="M12 1v5M12 18v5M1 12h5M18 12h5"/></svg></button><button type="button" class="dock-tool" id="dock-fit" onclick="fitDiagramToViewport()" title="Ajustar fluxograma à tela" aria-label="Ajustar fluxograma à tela"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3H3v6M15 3h6v6M3 15v6h6M21 15v6h-6M3 9l6-6M15 3l6 6M3 15l6 6M21 15l-6 6"/></svg></button><div class="dock-sep"></div><button type="button" class="dock-tool" id="dock-grid" data-tool="grid" onclick="openDockFlyout('grid')" title="Grade, ímã e réguas" aria-label="Grade, ímã e réguas" aria-haspopup="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg><span class="dock-caret">▸</span></button><button type="button" class="dock-tool" id="dock-moon" data-tool="moon" onclick="toggleWorkspaceTheme()" title="Alternar claro/escuro" aria-label="Alternar claro/escuro" ><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15A8 8 0 0 1 9 4 8 8 0 1 0 20 15Z"/></svg></button></aside>
+    <aside id="studioDock" aria-label="Ferramentas vetoriais"><button type="button" class="dock-tool" id="dock-select" data-tool="select" onclick="dockMode('select')" title="Ponteiro" aria-label="Ponteiro" ><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l14 10-7 1-3 7z"/></svg></button><button type="button" class="dock-tool" id="dock-pen" data-tool="pen" onclick="dockMode('pen-straight')" title="Caneta reta" aria-label="Caneta reta" ><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20L20 4M12 4h8v8"/></svg></button><button type="button" class="dock-tool" id="dock-curve" data-tool="curve" onclick="dockMode('pen-curve')" title="Caneta curva Bézier" aria-label="Caneta curva Bézier" ><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18Q8 3 13 12T21 6"/></svg></button><div class="dock-sep"></div><button type="button" class="dock-tool" id="dock-shapes" data-tool="shapes" onclick="openDockFlyout('shapes')" title="Formas e símbolos" aria-label="Formas e símbolos" aria-haspopup="true"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="9" height="9" rx="1"/><circle cx="17" cy="16" r="5"/></svg><span class="dock-caret">▸</span></button><button type="button" class="dock-tool" id="dock-line" data-tool="line" onclick="openDockFlyout('line')" title="Linhas e setas" aria-label="Linhas e setas" aria-haspopup="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18L21 6"/><circle cx="3" cy="18" r="2"/><circle cx="21" cy="6" r="2"/></svg><span class="dock-caret">▸</span></button><button type="button" class="dock-tool" id="dock-font" data-tool="font" onclick="openDockFlyout('font')" title="Fontes e texto" aria-label="Fontes e texto" aria-haspopup="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20L12 3l8 17M7 14h10"/></svg><span class="dock-caret">▸</span></button><button type="button" class="dock-tool" id="dock-text" onclick="addNodeAtCenter('text')" title="Adicionar texto livre" aria-label="Adicionar texto livre"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16M12 5v15M8 20h8"/></svg></button><button type="button" class="dock-tool" id="dock-image" data-tool="image" onclick="openDockFlyout('image')" title="Importar imagem" aria-label="Importar imagem" aria-haspopup="true"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8" cy="9" r="1.5"/><path d="M4 18l6-6 4 4 3-3 4 4"/></svg><span class="dock-caret">▸</span></button><button type="button" class="dock-tool" id="dock-fill" data-tool="fill" onclick="openDockFlyout('fill')" title="Cores e preenchimento" aria-label="Cores e preenchimento" aria-haspopup="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3l9 9-6 6-9-9zM14 19h8"/></svg><span class="dock-caret">▸</span></button><div class="dock-sep"></div><button type="button" class="dock-tool" id="dock-edit" data-tool="edit" onclick="openDockFlyout('edit')" title="Alinhar elementos" aria-label="Alinhar elementos" aria-haspopup="true"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="5" width="12" height="12"/><path d="M9 1v4M17 9h5M1 13h4"/></svg><span class="dock-caret">▸</span></button><button type="button" class="dock-tool" id="dock-copy" data-tool="copy" onclick="duplicateSelectedNode()" title="Duplicar elemento" aria-label="Duplicar elemento" ><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="7" width="13" height="13" rx="1"/><path d="M4 16H3V3h13v1"/></svg></button><button type="button" class="dock-tool" id="dock-delete" data-tool="delete" onclick="deleteSelectedElement()" title="Excluir elemento" aria-label="Excluir elemento" ><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14M10 11v7M14 11v7"/></svg></button><div class="dock-spacer"></div><button type="button" class="dock-tool compact-star" id="dock-star" onclick="toggleCompactWorkspace()" title="Engrenagem: alternar exibição dos recursos superiores" aria-label="Alternar exibição dos recursos superiores" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.8 2.4h4.4l.6 2.5 2 1.1 2.5-.7 2.2 3.8-1.9 1.8v2.2l1.9 1.8-2.2 3.8-2.5-.7-2 1.1-.6 2.5H9.8l-.6-2.5-2-1.1-2.5.7-2.2-3.8 1.9-1.8v-2.2L2.5 9.1l2.2-3.8 2.5.7 2-1.1z M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6"/></svg></button><button type="button" class="dock-tool" id="dock-files" data-tool="files" title="Arquivos, modelos e exportação" aria-label="Arquivos e exportação"><svg viewBox="0 0 24 24"><path d="M5 3h10l4 4v14H5zM14 3v5h5M8 13h8M8 17h8"/></svg></button><button type="button" class="dock-tool" id="dock-properties" data-tool="properties" title="Propriedades do objeto" aria-label="Propriedades do objeto"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16"/><circle cx="9" cy="5" r="2" fill="currentColor" stroke="none"/><circle cx="16" cy="12" r="2" fill="currentColor" stroke="none"/><circle cx="11" cy="19" r="2" fill="currentColor" stroke="none"/></svg></button><button type="button" class="dock-tool" id="dock-center" onclick="resetView()" title="Centralizar / 100%" aria-label="Centralizar prancheta em 100%"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path d="M12 1v5M12 18v5M1 12h5M18 12h5"/></svg></button><button type="button" class="dock-tool" id="dock-fit" onclick="fitDiagramToViewport()" title="Ajustar fluxograma à tela" aria-label="Ajustar fluxograma à tela"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3H3v6M15 3h6v6M3 15v6h6M21 15v6h-6M3 9l6-6M15 3l6 6M3 15l6 6M21 15l-6 6"/></svg></button><div class="dock-sep"></div><button type="button" class="dock-tool" id="dock-grid" data-tool="grid" onclick="openDockFlyout('grid')" title="Grade, ímã e réguas" aria-label="Grade, ímã e réguas" aria-haspopup="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg><span class="dock-caret">▸</span></button><button type="button" class="dock-tool" id="dock-moon" data-tool="moon" onclick="toggleWorkspaceTheme()" title="Alternar claro/escuro" aria-label="Alternar claro/escuro" ><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15A8 8 0 0 1 9 4 8 8 0 1 0 20 15Z"/></svg></button></aside>
     <section id="dockFlyout" class="hidden" role="dialog" aria-label="Opções da ferramenta"><div class="dock-fly-head"><strong id="dockFlyTitle">Ferramentas</strong><button type="button" onclick="closeDockFlyout()" aria-label="Fechar painel">✕</button></div><div id="dockFlyBody"></div></section>
     <input type="file" id="dockImageInput" accept=".ico,.svg,.bmp,.webp,.jpg,.jpeg,.png,image/x-icon,image/svg+xml,image/bmp,image/webp,image/jpeg,image/png" hidden onchange="handleImageUpload(event)" />
     <div id="penCardStorage"></div>
@@ -1004,6 +1009,7 @@
         case 'sort':return {w:165,h:100,text:'Ordenar',fill:'#fef3c7',stroke:'#d97706',tc:'#78350f'};
         case 'collate':return {w:165,h:100,text:'Intercalar',fill:'#ecfeff',stroke:'#0891b2',tc:'#164e63'};
         case 'or':return {w:95,h:95,text:'OU',fill:'#f3e8ff',stroke:'#7e22ce',tc:'#581c87'};
+        case 'text': return {w:240,h:80,text:'Digite seu texto',fill:'transparent',stroke:'transparent',tc:'#0f172a'};
         case 'process':
         default:          return { w: 180, h: 66, text: 'Novo Processo', fill: '#dbeafe', stroke: '#2563eb', tc: '#1e3a8a' };
       }
@@ -1027,7 +1033,7 @@
         stroke: defs.stroke,
         textColor: defs.tc,
         fontFamily: "'Inter', system-ui, sans-serif",
-        fontSize: 13
+        fontSize: type === 'text' ? 20 : 13
       };
 
       state.nodes.push(newNode);
@@ -1039,6 +1045,7 @@
 
     // Constrói as formas com acabamento 3D suave (base + camada bevel3d)
     function buildNodeShapeSvg(node) {
+      if (node.type === 'text') return '';
       const w = node.width;
       const h = node.height;
       const p = 2;
@@ -1151,7 +1158,7 @@
       state.nodes.forEach(node => {
         const el = document.createElement('div');
         const isSelected = selection.type === 'node' && selection.id === node.id;
-        el.className = `flow-node pointer-events-auto ${isSelected ? 'selected' : ''}`;
+        el.className = `flow-node pointer-events-auto ${isSelected ? 'selected' : ''} ${node.type === 'text' ? 'free-text-node' : ''}`;
         el.style.left = `${node.x}px`;
         el.style.top = `${node.y}px`;
         el.style.width = `${node.width}px`;
@@ -1161,7 +1168,9 @@
         const isContainer = node.type === 'container';
         const fontFam = node.fontFamily || "'Inter', system-ui, sans-serif";
         const fontSz = node.fontSize || 13;
-        const labelStyle = isContainer
+        const labelStyle = node.type === 'text'
+          ? `align-items: flex-start; justify-content: flex-start; text-align:left; padding:5px 7px; font-weight: 400; color: ${node.textColor}; font-family: ${fontFam}; font-size: ${fontSz}px;`
+          : isContainer
           ? `align-items: flex-start; justify-content: flex-start; padding: 12px 14px; font-weight: 700; color: ${node.textColor}; font-family: ${fontFam}; font-size: ${fontSz}px;`
           : `color: ${node.textColor}; font-family: ${fontFam}; font-size: ${fontSz}px;`;
 
@@ -1708,7 +1717,7 @@
         const node = state.nodes.find(n => n.id === selection.id);
         if (!node) return;
         nodeEditor.classList.remove('hidden');
-        document.getElementById('propNodeTypeBadge').textContent = node.type === 'image' ? 'Imagem' : 'Forma 3D';
+        document.getElementById('propNodeTypeBadge').textContent = node.type === 'image' ? 'Imagem' : node.type === 'text' ? 'Texto livre' : 'Forma 3D';
         document.getElementById('propNodeText').value = node.text;
         document.getElementById('propFontFamily').value = node.fontFamily || "'Inter', system-ui, sans-serif";
         document.getElementById('propFontSize').value = node.fontSize || 13;
@@ -1909,13 +1918,13 @@
           const fontSize = node.fontSize || 13;
           const lineHeight = fontSize * 1.3;
           const totalHeight = lines.length * lineHeight;
-          const startY = (node.height / 2) - (totalHeight / 2) + (fontSize * 0.85);
+          const startY = node.type === 'text' ? 5 + fontSize * .85 : (node.height / 2) - (totalHeight / 2) + (fontSize * 0.85);
           const fam = (node.fontFamily || 'Inter, Arial, sans-serif').replace(/"/g, "'");
 
-          svg += `<text x="${node.width/2}" y="${startY}" text-anchor="middle" font-family="${fam}" font-size="${fontSize}" font-weight="500" fill="${node.textColor}">`;
+          svg += `<text x="${node.type === 'text' ? 7 : node.width/2}" y="${startY}" text-anchor="${node.type === 'text' ? 'start' : 'middle'}" font-family="${fam}" font-size="${fontSize}" font-weight="${node.type === 'text' ? 400 : 500}" fill="${node.textColor}">`;
           lines.forEach((line, idx) => {
             const dy = idx === 0 ? 0 : lineHeight;
-            svg += `<tspan x="${node.width/2}" dy="${dy}">${escapeHtml(line)}</tspan>`;
+            svg += `<tspan x="${node.type === 'text' ? 7 : node.width/2}" dy="${dy}">${escapeHtml(line)}</tspan>`;
           });
           svg += `</text>`;
         }
