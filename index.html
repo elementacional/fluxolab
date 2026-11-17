@@ -2092,7 +2092,7 @@
     const FORM_CATEGORIES=['Etapas e decisões','Entradas e documentos','Dados e armazenamento','Conexões e lógica','Formas adicionais'];
     // A biblioteca preserva as categorias marcadas até que o usuário as desmarque.
     // Seleções de várias categorias são apresentadas em sequência, com scroll vertical.
-    let chosenFormCategories=new Set(['Etapas e decisões']);
+    let chosenFormCategories=new Set(FORM_CATEGORIES);
     function showFormsHome(){
       const host=document.getElementById('formsCollection');
       if(host)host.scrollTo({top:0,behavior:'smooth'});
@@ -2109,9 +2109,12 @@
       host.replaceChildren();const all=[...FLOW_SHAPES,...EXTRA_SHAPES];
       const title=document.createElement('div');title.className='forms-selected-title';
       const count=document.createElement('span');count.textContent=`Formas reunidas · ${chosenFormCategories.size} categoria(s)`;
+      const showAll=document.createElement('button');showAll.type='button';showAll.textContent='Mostrar todas (23)';
+      showAll.onclick=()=>{chosenFormCategories=new Set(FORM_CATEGORIES);try{localStorage.setItem('fluxolab-forms-categories',JSON.stringify([...chosenFormCategories]))}catch(e){};const checks=document.querySelectorAll('#formsCategoriesPopup .forms-category-check input');checks.forEach(c=>c.checked=true);const label=document.querySelector('.forms-categories-trigger span');if(label)label.textContent='Categorias de formas · '+chosenFormCategories.size+' selecionada(s)';renderCombinedForms()};
+      title.append(count,showAll);
       const clear=document.createElement('button');clear.type='button';clear.textContent='Desmarcar todas';
       clear.onclick=()=>{chosenFormCategories.clear();try{localStorage.setItem('fluxolab-forms-categories','[]')}catch(e){};host.closest('#formsCollection').querySelectorAll('.forms-category-check input').forEach(c=>c.checked=false);const label=host.closest('#formsCollection').querySelector('.forms-categories-trigger span');if(label)label.textContent='Categorias de formas · 0 selecionada(s)';renderCombinedForms()};
-      title.append(count,clear);host.append(title);
+      title.append(clear);host.append(title);
       if(!chosenFormCategories.size){const empty=document.createElement('p');empty.className='forms-empty-note';empty.textContent='Nenhuma categoria selecionada.';host.append(empty);return}
       for(const cat of FORM_CATEGORIES){
         if(!chosenFormCategories.has(cat))continue;
@@ -2164,7 +2167,11 @@
     }
     function restoreFormsCategories(){
       try{const stored=JSON.parse(localStorage.getItem('fluxolab-forms-categories'));
-        if(Array.isArray(stored))chosenFormCategories=new Set(stored.filter(x=>FORM_CATEGORIES.includes(x)));
+        if(Array.isArray(stored)){
+          const saved=new Set(stored.filter(x=>FORM_CATEGORIES.includes(x)));
+          // Corrige preferências antigas em que a biblioteca ficava sem formas visíveis.
+          chosenFormCategories=saved.size?saved:new Set(FORM_CATEGORIES);
+        }
       }catch(e){}
     }
     function initFormsDragging(){
@@ -2287,7 +2294,7 @@ function updateSelectedFont(key,value){if(selection.type!=='node'){showToast('Se
 window.setDockFont=function(prop,id){const el=$d(id);updateSelectedFont(prop,prop==='fontSize'?Number(el.value):el.value)};
 window.setDockFill=function(id){if(selection.type!=='node'){showToast('Selecione uma forma.');return;}updateSelectedNodeProp('fill',$d(id).value);renderAll()};
 window.openDockFlyout=function(name){if(activeFly===name){if(document.body.classList.contains('compact-ui'))return;closeDockFlyout();return;}activeFly=name;$d('dockFlyTitle').textContent=flyNames[name]||name;const box=$d('dockFlyBody');let html='';
-if(name==='shapes'){html='<p class="dock-fly-label">Clique para abrir a biblioteca completa.</p>'+action('▱ Abrir biblioteca de formas',"openDockShapes()")+action('▭ Retângulo / Processo',"dockInsertShape('process')")+action('◇ Decisão',"dockInsertShape('decision')")+action('◯ Início / Fim',"dockInsertShape('terminal')")+action('▤ Documento',"dockInsertShape('document')");}
+if(name==='shapes'){html='<p class="dock-fly-label">Clique para abrir a biblioteca completa.</p>'+action('▱ Abrir biblioteca de formas',"openDockShapes()")+action('▦ Mostrar todas as 23 formas',"showAllDockShapes()")+action('▭ Retângulo / Processo',"dockInsertShape('process')")+action('◇ Decisão',"dockInsertShape('decision')")+action('◯ Início / Fim',"dockInsertShape('terminal')")+action('▤ Documento',"dockInsertShape('document')");}
 if(name==='line'){html=action('╱ Caneta reta',"dockMode('pen-straight')")+action('⌁ Caneta curva',"dockMode('pen-curve')")+ '<p class="dock-fly-label">Selecione uma conexão para personalizar tipo, espessura e pontas de seta no painel direito.</p>' +action('Mostrar propriedades de linhas',"closeDockFlyout();document.getElementById('propertiesPanel').scrollIntoView({block:'nearest'})");}
 if(name==='font'){const n=selection.type==='node'?state.nodes.find(x=>x.id===selection.id):null;html=action('T Inserir novo bloco de texto',"dockInsertText()")+'<label class="dock-fly-label">Família tipográfica</label><select class="dock-fly-input" id="dockFontFamily" onchange="setDockFont(\'fontFamily\',\'dockFontFamily\')"><option value="Arial, sans-serif">Arial</option><option value="\'Inter\',system-ui,sans-serif">Inter</option><option value="\'Segoe UI\',sans-serif">Segoe UI</option><option value="Georgia,serif">Georgia</option><option value="\'Times New Roman\',serif">Times New Roman</option><option value="Verdana,sans-serif">Verdana</option><option value="\'Courier New\',monospace">Courier New</option></select><div class="dock-fly-row"><label class="dock-fly-label">Tamanho <input class="dock-fly-input" type="number" min="8" max="100" id="dockFontSize" value="'+(n?.fontSize||13)+'" oninput="setDockFont(\'fontSize\',\'dockFontSize\')"></label><label class="dock-fly-label">Cor <input type="color" id="dockFontColor" value="'+(n?.textColor||'#0f172a')+'" onchange="setDockFont(\'textColor\',\'dockFontColor\')"></label></div><p class="dock-fly-label">A lista usa fontes comuns instaladas; para fontes locais adicionais, utilize o seletor de propriedades.</p>';
 }
@@ -2300,8 +2307,9 @@ $d('dockFlyout').classList.remove('hidden');setActiveDock(name);
 if(name==='font'&&selection.type==='node'){const n=state.nodes.find(x=>x.id===selection.id);if(n){let opt=[...$d('dockFontFamily').options].find(o=>o.value===n.fontFamily);if(opt)$d('dockFontFamily').value=opt.value;}}
 };
 window.openDockShapes=function(){closeDockFlyout();toggleFormsPanel(true)};
+window.showAllDockShapes=function(){chosenFormCategories=new Set(FORM_CATEGORIES);try{localStorage.setItem('fluxolab-forms-categories',JSON.stringify([...chosenFormCategories]))}catch(e){};buildShapeLibrary();window.openDockShapes();};
 window.dockInsertShape=function(type){addNodeAtCenter(type);closeDockFlyout()};
-window.dockInsertText=function(){addNodeAtCenter('process');if(selection.type==='node'){const n=state.nodes.find(x=>x.id===selection.id);if(n){n.text='Texto';n.fill='#ffffff';n.stroke='#cbd5e1';n.fontSize=16;saveState();renderAll();}}closeDockFlyout()};
+window.dockInsertText=function(){addNodeAtCenter('text');closeDockFlyout()};
 window.toggleWorkspaceTheme=function(){const isDark=document.body.classList.toggle('studio-dark');try{localStorage.setItem('fluxolab-interface-theme',isDark?'dark':'light')}catch(e){}$d('dock-moon').setAttribute('aria-pressed',String(isDark));showToast('Interface '+(isDark?'escura':'clara')+' ativada');};
 window.addEventListener('DOMContentLoaded',()=>{let savedTheme='light';try{savedTheme=localStorage.getItem('fluxolab-interface-theme')||'light'}catch(e){}if(savedTheme==='dark'){document.body.classList.add('studio-dark');$d('dock-moon').setAttribute('aria-pressed','true')}setActiveDock('select');const penCard=$d('penFloatingCard');if(penCard)$d('penCardStorage').appendChild(penCard);document.addEventListener('pointerdown',e=>{if(activeFly&&!$d('dockFlyout').contains(e.target)&&!e.target.closest('#studioDock'))closeDockFlyout()});});
 })();
